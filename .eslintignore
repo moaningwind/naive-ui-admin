@@ -1,0 +1,6 @@
+# Place your Eslint ignore content here
+index.html
+dist
+
+/components.d.ts
+/auto-imports.d.ts
