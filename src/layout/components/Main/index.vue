@@ -1,6 +1,6 @@
 <script lang="ts">
 import { useAsyncRouteStore } from '@/store/modules/asyncRoute'
-import { useProjectSetting } from '@/store/hooks/useProjectSetting'
+import { useProjectSettingStore } from '@/store/modules/projectSetting'
 
 export default defineComponent({
   name: 'MainView',
@@ -16,13 +16,13 @@ export default defineComponent({
     },
   },
   setup() {
-    const { getIsPageAnimate, getPageAnimateType } = useProjectSetting()
+    const settingStore = useProjectSettingStore()
     const asyncRouteStore = useAsyncRouteStore()
     // 需要缓存的路由组件
     const keepAliveComponents = computed(() => asyncRouteStore.keepAliveComponents)
 
     const getTransitionName = computed(() => {
-      return unref(getIsPageAnimate) ? unref(getPageAnimateType) : ''
+      return settingStore.isPageAnimate ? settingStore.pageAnimateType : ''
     })
 
     return {

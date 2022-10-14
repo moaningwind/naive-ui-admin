@@ -71,11 +71,6 @@ export const useProjectSettingStore = defineStore({
     isPageAnimate,
     pageAnimateType,
   }),
-  actions: {
-    setIsMobile(value: boolean): void {
-      this.isMobile = value
-    },
-  },
 })
 
 // Need to be used outside the setup

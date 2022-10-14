@@ -4,7 +4,6 @@ import type { MenuOption } from 'naive-ui'
 import { generatorMenu, generatorMenuMix } from './helper'
 import { useAsyncRouteStore } from '@/store/modules/asyncRoute'
 import { useProjectSettingStore } from '@/store/modules/projectSetting'
-import { useProjectSetting } from '@/store/hooks/useProjectSetting'
 import { isUrl } from '@/utils/is'
 
 export default defineComponent({
@@ -12,20 +11,22 @@ export default defineComponent({
   name: 'Menu',
   props: {
     // 菜单模式
-    mode: {
+    'mode': {
       type: String as PropType<'vertical' | 'horizontal'>,
       default: 'vertical',
     },
     // 侧边栏菜单是否收起
-    modelValue: Boolean,
+    'modelValue': Boolean,
     // 位置
-    location: {
+    'location': {
       type: String,
       default: 'left',
     },
-    onClickMenuItem: Function as PropType<(key: string) => void>,
+    'onClickMenuItem': Function as PropType<(key: string) => void>,
+    // eslint-disable-next-line vue/prop-name-casing
+    'onUpdate:modelValue': Function as PropType<(key: Boolean) => void>,
   },
-  emits: ['update:modelValue'],
+  // emits: ['update:modelValue'],
   setup(props) {
     const collapsed = useVModel(props, 'modelValue')
     const currentRoute = useRoute()
@@ -35,8 +36,6 @@ export default defineComponent({
     const menus = ref<MenuOption[]>([])
     const selectedKeys = ref(currentRoute.name as string)
     const headerMenuSelectKey = ref('')
-
-    const { getNavMode: navMode } = useProjectSetting()
 
     const getOpenKeys = currentRoute.matched.map(item => item.name as string)
 
@@ -48,7 +47,7 @@ export default defineComponent({
 
     const getSelectedKeys = computed(() => {
       const { location } = props
-      return location === 'left' || (location === 'header' && unref(navMode) === 'horizontal')
+      return location === 'left' || (location === 'header' && settingStore.navMode === 'horizontal')
         ? unref(selectedKeys)
         : unref(headerMenuSelectKey)
     })

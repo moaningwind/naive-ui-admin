@@ -4,7 +4,7 @@ import type { RouteRecordRaw } from 'vue-router'
 import { store } from '@/store'
 import { asyncRoutes, constantRouter } from '@/router/index'
 import { generatorDynamicRouter } from '@/router/generator-routers'
-import { useProjectSetting } from '@/store/hooks/useProjectSetting'
+import { useProjectSettingStore } from '@/store/modules/projectSetting'
 
 export interface IAsyncRouteState {
   menus: RouteRecordRaw[]
@@ -57,8 +57,8 @@ export const useAsyncRouteStore = defineStore({
         return permissionsList.some(item => permissions.includes(item.value))
       }
 
-      const { getPermissionMode } = useProjectSetting()
-      const permissionMode = unref(getPermissionMode)
+      const settingStore = useProjectSettingStore()
+      const permissionMode = settingStore.permissionMode
 
       if (permissionMode === 'BACK') {
         try {

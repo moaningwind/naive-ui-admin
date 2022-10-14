@@ -12,8 +12,8 @@ import elementResizeDetectorMaker from 'element-resize-detector'
 
 import { useMessage, useThemeVars } from 'naive-ui'
 import { useRoute, useRouter } from 'vue-router'
-import { useDesignSetting } from '@/store/hooks/useDesignSetting'
-import { useProjectSetting } from '@/store/hooks/useProjectSetting'
+import { useDesignSettingStore } from '@/store/modules/designSetting'
+import { useProjectSettingStore } from '@/store/modules/projectSetting'
 
 import type { RouteItem } from '@/store/modules/tabsView'
 import { useTabsViewStore } from '@/store/modules/tabsView'
@@ -39,9 +39,8 @@ export default defineComponent({
     },
   },
   setup(props) {
-    const { getDarkTheme, getAppTheme } = useDesignSetting()
-    const { getNavMode, getMenuSetting, getMultiTabsSetting, getIsMobile }
-      = useProjectSetting()
+    const designSettingStore = useDesignSettingStore()
+    const settingStore = useProjectSettingStore()
 
     const message = useMessage()
     const route = useRoute()
@@ -49,8 +48,8 @@ export default defineComponent({
     const tabsViewStore = useTabsViewStore()
     const asyncRouteStore = useAsyncRouteStore()
     const storage = createLocalStorage()
-    const navScroll: any = ref(null)
-    const navWrap: any = ref(null)
+    const navScroll = shallowRef<HTMLElement>()
+    const navWrap = ref<HTMLElement>()
     const isCurrent = ref(false)
     const go = useGo()
 
@@ -71,7 +70,6 @@ export default defineComponent({
       dropdownY: 0,
       showDropdown: false,
       isMultiHeaderFixed: false,
-      multiTabsSetting: getMultiTabsSetting,
     })
 
     // 获取简易的路由对象
@@ -83,17 +81,16 @@ export default defineComponent({
     // 动态组装样式 菜单缩进
     const getChangeStyle = computed(() => {
       const { collapsed } = props
-      const navMode = unref(getNavMode)
-      const { minMenuWidth, menuWidth }: any = unref(getMenuSetting)
-      const { fixed }: any = unref(getMultiTabsSetting)
+      const { minMenuWidth, menuWidth } = settingStore.menuSetting
+      const { fixed } = settingStore.multiTabsSetting
       const lenNum
-        = navMode === 'horizontal'
+        = settingStore.navMode === 'horizontal'
           ? '0px'
           : collapsed
             ? `${minMenuWidth}px`
             : `${menuWidth}px`
 
-      if (getIsMobile.value) {
+      if (settingStore.isMobile) {
         return {
           left: '0px',
           width: '100%',
@@ -284,6 +281,8 @@ export default defineComponent({
      * @param amplitude 每次滚动的长度
      */
     function scrollTo(value: number, amplitude: number) {
+      if (!navScroll.value)
+        return
       const currentScroll = navScroll.value.scrollLeft
       const scrollWidth
         = (amplitude > 0 && currentScroll + amplitude >= value)
@@ -297,6 +296,8 @@ export default defineComponent({
     }
 
     function scrollPrev() {
+      if (!navScroll.value)
+        return
       const containerWidth = navScroll.value.offsetWidth
       const currentScroll = navScroll.value.scrollLeft
 
@@ -307,6 +308,8 @@ export default defineComponent({
     }
 
     function scrollNext() {
+      if (!navScroll.value)
+        return
       const containerWidth = navScroll.value.offsetWidth
       const navWidth = navScroll.value.scrollWidth
       const currentScroll = navScroll.value.scrollLeft
@@ -334,8 +337,7 @@ export default defineComponent({
         state.scrollable = true
         if (autoScroll) {
           const tagList = navScroll.value.querySelectorAll('.tabs-card-scroll-item') || []
-          ;[...tagList].forEach((tag: HTMLElement) => {
-            // fix SyntaxError
+          Array.prototype.forEach.call(tagList, (tag: HTMLElement) => {
             if (tag.id === `tag${state.activeKey.split('/').join('\/')}`)
               tag.scrollIntoView && tag.scrollIntoView()
           })
@@ -391,6 +393,8 @@ export default defineComponent({
     }
 
     return {
+      settingStore,
+      designSettingStore,
       ...toRefs(state),
       navWrap,
       navScroll,
@@ -410,8 +414,6 @@ export default defineComponent({
       scrollPrev,
       handleContextMenu,
       onClickOutside,
-      getDarkTheme,
-      getAppTheme,
       getCardColor,
       getBaseColor,
     }
@@ -423,10 +425,10 @@ export default defineComponent({
   <div
     class="tabs-view"
     :class="{
-      'tabs-view-fix': multiTabsSetting.fixed,
+      'tabs-view-fix': settingStore.multiTabsSetting.fixed,
       'tabs-view-fixed-header': isMultiHeaderFixed,
-      'tabs-view-default-background': getDarkTheme === false,
-      'tabs-view-dark-background': getDarkTheme === true,
+      'tabs-view-default-background': designSettingStore.darkTheme === false,
+      'tabs-view-dark-background': designSettingStore.darkTheme === true,
     }"
     :style="getChangeStyle"
   >
@@ -579,7 +581,7 @@ export default defineComponent({
         }
 
         .active-item {
-          color: v-bind(getAppTheme);
+          color: v-bind('designSettingStore.appTheme');
         }
       }
     }

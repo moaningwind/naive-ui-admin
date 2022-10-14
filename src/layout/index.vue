@@ -4,62 +4,51 @@ import { TabsView } from './components/TagsView'
 import { MainView } from './components/Main'
 import { AsideMenu } from './components/Menu'
 import { PageHeader } from './components/Header'
-import { useProjectSetting } from '@/store/hooks/useProjectSetting'
-import { useDesignSetting } from '@/store/hooks/useDesignSetting'
+import { useDesignSettingStore } from '@/store/modules/designSetting'
 import { useProjectSettingStore } from '@/store/modules/projectSetting'
 
-const { getDarkTheme } = useDesignSetting()
-const {
-  getNavMode,
-  getNavTheme,
-  getHeaderSetting,
-  getMenuSetting,
-  getMultiTabsSetting,
-} = useProjectSetting()
-
+const designSettingStore = useDesignSettingStore()
 const settingStore = useProjectSettingStore()
-
-const navMode = getNavMode
 
 const collapsed = ref<boolean>(false)
 
-const { mobileWidth, menuWidth } = unref(getMenuSetting)
+const { mobileWidth, menuWidth } = settingStore.menuSetting
 
 const isMobile = computed<boolean>({
   get: () => settingStore.isMobile,
-  set: val => settingStore.setIsMobile(val),
+  set: val => settingStore.isMobile = val,
 })
 
 const fixedHeader = computed(() => {
-  const { fixed } = unref(getHeaderSetting)
+  const { fixed } = settingStore.headerSetting
   return fixed ? 'absolute' : 'static'
 })
 
 const fixedMenu = computed(() => {
-  const { fixed } = unref(getHeaderSetting)
+  const { fixed } = settingStore.headerSetting
   return fixed ? 'absolute' : 'static'
 })
 
 const isMultiTabs = computed(() => {
-  return unref(getMultiTabsSetting).show
+  return settingStore.multiTabsSetting.show
 })
 
 const fixedMulti = computed(() => {
-  return unref(getMultiTabsSetting).fixed
+  return settingStore.multiTabsSetting.fixed
 })
 
 const inverted = computed(() => {
-  const navTheme = unref(getNavTheme)
+  const navTheme = settingStore.navTheme
   return ['dark', 'header-dark'].includes(navTheme)
 })
 
 const getHeaderInverted = computed(() => {
-  const navTheme = unref(getNavTheme)
+  const navTheme = settingStore.navTheme
   return ['light', 'header-dark'].includes(navTheme) ? unref(inverted) : !unref(inverted)
 })
 
 const leftMenuWidth = computed(() => {
-  const { minMenuWidth, menuWidth } = unref(getMenuSetting)
+  const { minMenuWidth, menuWidth } = settingStore.menuSetting
   return collapsed.value ? minMenuWidth : menuWidth
 })
 
@@ -99,7 +88,7 @@ onMounted(() => {
   <n-layout class="layout" :position="fixedMenu" has-sider>
     <n-layout-sider
       v-if="
-        !isMobile && navMode === 'vertical'
+        !isMobile && settingStore.navMode === 'vertical'
       "
       v-model:collapsed="collapsed"
       class="layout-sider"
@@ -132,7 +121,7 @@ onMounted(() => {
 
       <n-layout-content
         flex-auto min-h-100vh
-        :class="{ 'color-#f5f7f9': getDarkTheme === false }"
+        :class="{ 'color-#f5f7f9': designSettingStore.darkTheme === false }"
       >
         <div
           relative mx-10px mb-10px

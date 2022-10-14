@@ -6,7 +6,7 @@ import ProjectSetting from './ProjectSetting.vue'
 import { TABS_ROUTES } from '@/store/mutation-types'
 import { useUserStore } from '@/store/modules/user'
 import { AsideMenu } from '@/layout/components/Menu'
-import { useProjectSetting } from '@/store/hooks/useProjectSetting'
+import { useProjectSettingStore } from '@/store/modules/projectSetting'
 
 export default defineComponent({
   name: 'PageHeader',
@@ -21,8 +21,7 @@ export default defineComponent({
     const userStore = useUserStore()
     const message = useMessage()
     const dialog = useDialog()
-    const { getNavMode, getNavTheme, getHeaderSetting, getMenuSetting, getCrumbsSetting }
-      = useProjectSetting()
+    const settingStore = useProjectSettingStore()
 
     const { username } = userStore?.info || {}
 
@@ -31,19 +30,15 @@ export default defineComponent({
     const state = reactive({
       username: username || '',
       fullscreenIcon: 'FullscreenOutlined',
-      navMode: getNavMode,
-      navTheme: getNavTheme,
-      headerSetting: getHeaderSetting,
-      crumbsSetting: getCrumbsSetting,
     })
 
     const getInverted = computed(() => {
-      const navTheme = unref(getNavTheme)
+      const navTheme = settingStore.navTheme
       return ['light', 'header-dark'].includes(navTheme) ? props.inverted : !props.inverted
     })
 
     const mixMenu = computed(() => {
-      return unref(getMenuSetting).mixMenu
+      return settingStore.menuSetting.mixMenu
     })
 
     const router = useRouter()
@@ -160,6 +155,7 @@ export default defineComponent({
     }
 
     return {
+      settingStore,
       ...toRefs(state),
       iconList,
       toggleFullScreen,
@@ -184,10 +180,10 @@ export default defineComponent({
   <div class="layout-header">
     <!-- 顶部菜单 -->
     <div
-      v-if="navMode === 'horizontal' || mixMenu"
+      v-if="settingStore.navMode === 'horizontal' || mixMenu"
       class="layout-header-left"
     >
-      <div v-if="navMode === 'horizontal'" class="logo">
+      <div v-if="settingStore.navMode === 'horizontal'" class="logo">
         <!-- <img src="~@/assets/svg/logo.svg"> -->
         <h2 v-show="!collapsed" leading-16>
           Naive Ui Admin
@@ -216,7 +212,7 @@ export default defineComponent({
       </div>
       <!-- 刷新 -->
       <div
-        v-if="headerSetting.isReload"
+        v-if="settingStore.headerSetting.isReload"
         class="mr-1 layout-header-trigger layout-header-trigger-min"
         @click="reloadPage"
       >
@@ -225,7 +221,7 @@ export default defineComponent({
         </n-icon>
       </div>
       <!-- 面包屑 -->
-      <n-breadcrumb v-if="crumbsSetting.show">
+      <n-breadcrumb v-if="settingStore.crumbsSetting.show">
         <template v-for="routeItem in breadcrumbList" :key="routeItem.name">
           <n-breadcrumb-item>
             <n-dropdown
@@ -236,7 +232,7 @@ export default defineComponent({
               <span class="link-text">
                 <component
                   :is="routeItem.meta.icon"
-                  v-if="crumbsSetting.showIcon && routeItem.meta.icon"
+                  v-if="settingStore.crumbsSetting.showIcon && routeItem.meta.icon"
                 />
                 {{ routeItem.meta.title }}
               </span>
@@ -244,7 +240,7 @@ export default defineComponent({
             <span v-else class="link-text">
               <component
                 :is="routeItem.meta.icon"
-                v-if="crumbsSetting.showIcon && routeItem.meta.icon"
+                v-if="settingStore.crumbsSetting.showIcon && routeItem.meta.icon"
               />
               {{ routeItem.meta.title }}
             </span>
