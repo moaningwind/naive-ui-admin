@@ -9,7 +9,6 @@ const demandList = reactive([
   { name: '商品图片需要提供放大镜', id: 5 },
   { name: '订单需要提供删除到回收站', id: 6 },
   { name: '用户头像上传，需要支持裁剪', id: 7 },
-  { name: '据说Vue3.2发布了，setup啥时候支持？', id: 8 },
 ])
 
 const exploitList = reactive([{ name: '商品图片需要提供放大镜', id: 5 }])
@@ -41,7 +40,7 @@ const approvedList = reactive([{ name: '商品图片需要提供放大镜', id: 
       <n-grid-item>
         <NCard
           title="需求池"
-          :segmented="{ content: 'hard', footer: 'hard' }"
+          :segmented="{ content: 'soft', footer: 'soft' }"
           size="small"
           :bordered="false"
         >
@@ -73,7 +72,7 @@ const approvedList = reactive([{ name: '商品图片需要提供放大镜', id: 
       <n-grid-item>
         <NCard
           title="开发中"
-          :segmented="{ content: 'hard', footer: 'hard' }"
+          :segmented="{ content: 'soft', footer: 'soft' }"
           size="small"
           :bordered="false"
         >
@@ -91,7 +90,7 @@ const approvedList = reactive([{ name: '商品图片需要提供放大镜', id: 
             item-key="name"
           >
             <template #item="{ element }">
-              <div class="cursor-move draggable-li">
+              <div class="draggable-li">
                 <n-tag type="warning">
                   开发中
                 </n-tag>
@@ -105,7 +104,7 @@ const approvedList = reactive([{ name: '商品图片需要提供放大镜', id: 
       <n-grid-item>
         <NCard
           title="已完成"
-          :segmented="{ content: 'hard', footer: 'hard' }"
+          :segmented="{ content: 'soft', footer: 'soft' }"
           size="small"
           :bordered="false"
         >
@@ -136,7 +135,7 @@ const approvedList = reactive([{ name: '商品图片需要提供放大镜', id: 
       <n-grid-item>
         <NCard
           title="已验收"
-          :segmented="{ content: 'hard', footer: 'hard' }"
+          :segmented="{ content: 'soft', footer: 'soft' }"
           size="small"
           :bordered="false"
         >
@@ -178,6 +177,7 @@ const approvedList = reactive([{ name: '商品图片需要提供放大镜', id: 
     padding: 16px 10px;
     color: #333;
     border-bottom: 1px solid #efeff5;
+    cursor: move;
   }
 }
 </style>

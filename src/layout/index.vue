@@ -10,11 +10,11 @@ import { useProjectSettingStore } from '@/store/modules/projectSetting'
 const designSettingStore = useDesignSettingStore()
 const settingStore = useProjectSettingStore()
 
-const collapsed = ref<boolean>(false)
+const collapsed = ref(false)
 
 const { mobileWidth, menuWidth } = settingStore.menuSetting
 
-const isMobile = computed<boolean>({
+const isMobile = computed({
   get: () => settingStore.isMobile,
   set: val => settingStore.isMobile = val,
 })
@@ -85,7 +85,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <n-layout class="layout" :position="fixedMenu" has-sider>
+  <n-layout class="layout" flex="~ auto" :position="fixedMenu" has-sider>
     <n-layout-sider
       v-if="
         !isMobile && settingStore.navMode === 'vertical'
@@ -144,39 +144,24 @@ onMounted(() => {
   </n-layout>
 </template>
 
-<style lang="less">
-.layout-side-drawer {
-  background-color: rgb(0, 20, 40);
-
-  .n-layout-sider {
-    min-height: 100vh;
-    box-shadow: 2px 0 8px 0 rgb(29 35 41 / 5%);
-    position: relative;
-    z-index: 13;
-    transition: all 0.2s ease-in-out;
-  }
-}
-</style>
-
 <style lang="less" scoped>
 .layout {
-  display: flex;
-  flex: auto;
-
   .n-layout-sider {
-    min-height: 100vh;
-    box-shadow: 2px 0 8px 0 rgb(29 35 41 / 5%);
+    // box-shadow: 2px 0 8px 0 rgb(29 35 41 / 5%);
     position: relative;
-    z-index: 13;
-    transition: all 0.2s ease-in-out;
   }
 
   .n-layout-header.n-layout-header--absolute-positioned {
-    z-index: 11;
+    z-index: 1;
   }
+}
 
-  .n-layout-footer {
-    background: none;
+:global(.layout-side-drawer) {
+  background-color: rgb(0, 20, 40);
+
+  .n-layout-sider {
+    // box-shadow: 2px 0 8px 0 rgb(29 35 41 / 5%);
+    position: relative;
   }
 }
 </style>

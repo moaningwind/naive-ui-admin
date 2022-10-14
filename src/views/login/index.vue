@@ -72,7 +72,7 @@ const handleSubmit = (e) => {
 </script>
 
 <template>
-  <div flex="~ col" h-100vh overflow-auto class="view-account">
+  <div flex="~ col" class="view-account">
     <div flex-1 py-8 w-96 mx-auto>
       <div py-8 text-center>
         <h1 color="#808695">
@@ -136,6 +136,8 @@ const handleSubmit = (e) => {
 <style scoped>
 @media (min-width: 768px) {
   .view-account {
+    height: 100vh;
+    overflow: auto;
     background-image: url('@/assets/svg/login.svg');
     background-repeat: no-repeat;
     background-position: 50%;

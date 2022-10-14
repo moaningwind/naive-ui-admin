@@ -12,23 +12,19 @@ export default defineComponent({
   name: 'PageHeader',
   components: { ...components, ProjectSetting, AsideMenu },
   props: {
-    modelValue: Boolean,
-    inverted: Boolean,
+    'modelValue': Boolean,
+    'inverted': Boolean,
+    // eslint-disable-next-line vue/prop-name-casing
+    'onUpdate:modelValuee': Function,
   },
-  emits: ['update:modelValue'],
+  // emits: ['update:modelValue'],
   setup(props) {
     const collapsed = useVModel(props, 'modelValue')
-    const userStore = useUserStore()
-    const message = useMessage()
-    const dialog = useDialog()
     const settingStore = useProjectSettingStore()
-
-    const { username } = userStore?.info || {}
-
-    const drawerSetting = ref()
+    const userStore = useUserStore()
 
     const state = reactive({
-      username: username || '',
+      username: userStore.info?.username || '',
       fullscreenIcon: 'FullscreenOutlined',
     })
 
@@ -37,14 +33,7 @@ export default defineComponent({
       return ['light', 'header-dark'].includes(navTheme) ? props.inverted : !props.inverted
     })
 
-    const mixMenu = computed(() => {
-      return settingStore.menuSetting.mixMenu
-    })
-
-    const router = useRouter()
-    const route = useRoute()
-
-    const generator: any = (routerMap) => {
+    const generator = (routerMap) => {
       return routerMap.map((item) => {
         const currentMenu = {
           ...item,
@@ -52,19 +41,19 @@ export default defineComponent({
           key: item.name,
           disabled: item.path === '/',
         }
-        // 是否有子菜单，并递归处理
-        if (item.children && item.children.length > 0) {
-          // Recursion
-          currentMenu.children = generator(item.children, currentMenu)
-        }
+        if (item.children && item.children.length > 0)
+          currentMenu.children = generator(item.children)
+
         return currentMenu
       })
     }
 
+    const route = useRoute()
     const breadcrumbList = computed(() => {
       return generator(route.matched)
     })
 
+    const router = useRouter()
     const dropdownSelect = (key) => {
       router.push({ name: key })
     }
@@ -76,6 +65,8 @@ export default defineComponent({
       })
     }
 
+    const message = useMessage()
+    const dialog = useDialog()
     // 退出登录
     const doLogout = () => {
       dialog.info({
@@ -95,7 +86,7 @@ export default defineComponent({
                   redirect: route.fullPath,
                 },
               })
-              .finally(() => location.reload())
+              .finally(() => window.location.reload())
           })
         },
         onNegativeClick: () => {},
@@ -149,28 +140,26 @@ export default defineComponent({
       }
     }
 
+    const drawerSetting = ref() // ProjectSetting component
     function openSetting() {
-      const { openDrawer } = drawerSetting.value
-      openDrawer()
+      drawerSetting.value?.openDrawer()
     }
 
     return {
       settingStore,
-      ...toRefs(state),
-      iconList,
-      toggleFullScreen,
-      doLogout,
-      route,
-      dropdownSelect,
-      avatarOptions,
-      avatarSelect,
-      breadcrumbList,
-      reloadPage,
-      drawerSetting,
-      openSetting,
       collapsed,
       getInverted,
-      mixMenu,
+      ...toRefs(state),
+      iconList,
+      avatarOptions,
+      breadcrumbList,
+      drawerSetting,
+      doLogout,
+      reloadPage,
+      dropdownSelect,
+      toggleFullScreen,
+      avatarSelect,
+      openSetting,
     }
   },
 })
@@ -180,7 +169,7 @@ export default defineComponent({
   <div class="layout-header">
     <!-- 顶部菜单 -->
     <div
-      v-if="settingStore.navMode === 'horizontal' || mixMenu"
+      v-if="settingStore.navMode === 'horizontal' || settingStore.menuSetting.mixMenu"
       class="layout-header-left"
     >
       <div v-if="settingStore.navMode === 'horizontal'" class="logo">
@@ -334,7 +323,7 @@ export default defineComponent({
       }
     }
 
-    ::v-deep(.ant-breadcrumb span:last-child .link-text) {
+    :deep(.ant-breadcrumb span:last-child .link-text) {
       color: #515a6e;
     }
 
@@ -403,7 +392,7 @@ export default defineComponent({
   }
 
   .layout-header-left {
-    ::v-deep(.n-breadcrumb .n-breadcrumb-item:last-child .n-breadcrumb-item__link) {
+    :deep(.n-breadcrumb .n-breadcrumb-item:last-child .n-breadcrumb-item__link) {
       color: #515a6e;
     }
   }

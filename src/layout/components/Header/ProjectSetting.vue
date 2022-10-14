@@ -369,7 +369,7 @@ export default defineComponent({
   }
 
   .dark-switch .n-switch {
-    ::v-deep(.n-switch__rail) {
+    :deep(.n-switch__rail) {
       background-color: #000e1c;
     }
   }

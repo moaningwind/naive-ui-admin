@@ -9,12 +9,11 @@ import {
 } from '@vicons/antd'
 import Draggable from 'vuedraggable'
 import elementResizeDetectorMaker from 'element-resize-detector'
-
 import { useMessage, useThemeVars } from 'naive-ui'
 import { useRoute, useRouter } from 'vue-router'
+
 import { useDesignSettingStore } from '@/store/modules/designSetting'
 import { useProjectSettingStore } from '@/store/modules/projectSetting'
-
 import type { RouteItem } from '@/store/modules/tabsView'
 import { useTabsViewStore } from '@/store/modules/tabsView'
 import { useAsyncRouteStore } from '@/store/modules/asyncRoute'
@@ -42,17 +41,10 @@ export default defineComponent({
     const designSettingStore = useDesignSettingStore()
     const settingStore = useProjectSettingStore()
 
-    const message = useMessage()
     const route = useRoute()
     const router = useRouter()
-    const tabsViewStore = useTabsViewStore()
-    const asyncRouteStore = useAsyncRouteStore()
-    const storage = createLocalStorage()
-    const navScroll = shallowRef<HTMLElement>()
-    const navWrap = ref<HTMLElement>()
-    const isCurrent = ref(false)
-    const go = useGo()
 
+    // style
     const themeVars = useThemeVars()
 
     const getCardColor = computed(() => {
@@ -63,6 +55,16 @@ export default defineComponent({
       return themeVars.value.textColor1
     })
 
+    const storage = createLocalStorage()
+    const tabsViewStore = useTabsViewStore()
+    const asyncRouteStore = useAsyncRouteStore()
+
+    const go = useGo()
+
+    const navScroll = shallowRef<HTMLElement>()
+    const navWrap = ref<HTMLElement>()
+    const isCurrent = ref(false)
+
     const state = reactive({
       activeKey: route.fullPath,
       scrollable: false,
@@ -72,8 +74,7 @@ export default defineComponent({
       isMultiHeaderFixed: false,
     })
 
-    // 获取简易的路由对象
-    const getSimpleRoute = (route): RouteItem => {
+    const getPartialRoute = (route): RouteItem => {
       const { fullPath, hash, meta, name, params, path, query } = route
       return { fullPath, hash, meta, name, params, path, query }
     }
@@ -136,13 +137,13 @@ export default defineComponent({
     })
 
     let cacheRoutes: RouteItem[] = []
-    const simpleRoute = getSimpleRoute(route)
+    const partialRoute = getPartialRoute(route)
     try {
       const routesStr = storage.get<string>(TABS_ROUTES)
-      cacheRoutes = routesStr ? JSON.parse(routesStr) : [simpleRoute]
+      cacheRoutes = routesStr ? JSON.parse(routesStr) : [partialRoute]
     }
     catch (e) {
-      cacheRoutes = [simpleRoute]
+      cacheRoutes = [partialRoute]
     }
 
     // 将最新的路由信息同步到 localStorage 中
@@ -183,7 +184,7 @@ export default defineComponent({
         if (whiteList.includes(route.name as string))
           return
         state.activeKey = to
-        tabsViewStore.addTabs(getSimpleRoute(route))
+        tabsViewStore.addTabs(getPartialRoute(route))
         updateNavScroll(true)
       },
       { immediate: true },
@@ -194,6 +195,7 @@ export default defineComponent({
       storage.set(TABS_ROUTES, JSON.stringify(tabsList.value))
     })
 
+    const message = useMessage()
     // 关闭当前页面
     const removeTab = (route) => {
       if (tabsList.value.length === 1)
@@ -603,7 +605,6 @@ export default defineComponent({
 
 .tabs-view-fix {
   position: fixed;
-  z-index: 5;
   padding: 6px 19px 6px 10px;
   left: 200px;
 }

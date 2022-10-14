@@ -1,4 +1,5 @@
 <script lang="ts">
+import type { RouteRecordRaw } from 'vue-router'
 import { useRoute, useRouter } from 'vue-router'
 import type { MenuOption } from 'naive-ui'
 import { generatorMenu, generatorMenuMix } from './helper'
@@ -22,34 +23,31 @@ export default defineComponent({
       type: String,
       default: 'left',
     },
-    'onClickMenuItem': Function as PropType<(key: string) => void>,
+    'onClickMenuItem': Function,
     // eslint-disable-next-line vue/prop-name-casing
-    'onUpdate:modelValue': Function as PropType<(key: Boolean) => void>,
+    'onUpdate:modelValue': Function,
   },
   // emits: ['update:modelValue'],
   setup(props) {
     const collapsed = useVModel(props, 'modelValue')
-    const currentRoute = useRoute()
-    const router = useRouter()
     const asyncRouteStore = useAsyncRouteStore()
     const settingStore = useProjectSettingStore()
+
+    const route = useRoute()
     const menus = ref<MenuOption[]>([])
-    const selectedKeys = ref(currentRoute.name as string)
-    const headerMenuSelectKey = ref('')
-
-    const getOpenKeys = currentRoute.matched.map(item => item.name as string)
-
-    const openKeys = ref(getOpenKeys)
+    const openKeys = ref(route.matched.map(item => item.name as string))
 
     const inverted = computed(() => {
       return ['dark', 'header-dark'].includes(settingStore.navTheme)
     })
 
+    let selectedKeys = route.name as string
+    let headerMenuSelectKey = ''
     const getSelectedKeys = computed(() => {
       const { location } = props
       return location === 'left' || (location === 'header' && settingStore.navMode === 'horizontal')
-        ? unref(selectedKeys)
-        : unref(headerMenuSelectKey)
+        ? selectedKeys
+        : headerMenuSelectKey
     })
 
     // 监听分割菜单
@@ -63,11 +61,11 @@ export default defineComponent({
 
     // 跟随页面路由变化，切换菜单选中状态
     watch(
-      () => currentRoute.fullPath,
+      () => route.fullPath,
       () => {
         updateMenu()
-        openKeys.value = currentRoute.matched.map(item => item.name as string)
-        selectedKeys.value = currentRoute.name as string
+        openKeys.value = route.matched.map(item => item.name as string)
+        selectedKeys = route.name as string
       },
     )
 
@@ -78,12 +76,15 @@ export default defineComponent({
       }
       // 混合菜单
       else {
-        const firstRouteName = (currentRoute.matched[0].name as string) || ''
-        headerMenuSelectKey.value = firstRouteName
+        const firstRouteName = (route.matched[0].name as string) || ''
+        headerMenuSelectKey = firstRouteName
+        // TODO
+        // @ts-expect-error Why does Typescript prompt an error
         menus.value = generatorMenuMix(asyncRouteStore.menus, firstRouteName, props.location)
       }
     }
 
+    const router = useRouter()
     // 点击菜单
     function clickMenuItem(key: string) {
       if (isUrl(key))
@@ -119,8 +120,8 @@ export default defineComponent({
     })
 
     return {
-      openKeys,
       collapsed,
+      openKeys,
       menus,
       inverted,
       getSelectedKeys,
