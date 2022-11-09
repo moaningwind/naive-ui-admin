@@ -59,7 +59,7 @@ export function createVitePlugins(viteEnv: ViteEnv, isBuild: boolean, prodMock: 
       ],
     }),
 
-    // 按需引入NaiveUi且自动创建组件声明
+    // Import NaiveUi on demand and automatically create component declarations
     Components({
       dts: true,
       resolvers: [NaiveUiResolver()],
